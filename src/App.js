@@ -15,6 +15,7 @@ import Createpost from './screens/Createpost';
 import Modal from './components/Modal';
 import Userprofile from './components/Userprofile';
 import Myfollowingpost from './screens/Myfollowingpost';
+import { GoogleOAuthProvider } from '@react-oauth/google';
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -23,6 +24,8 @@ function App() {
   return (
       <BrowserRouter>
           <div className="App">
+            
+          <GoogleOAuthProvider clientId="342910136541-t3roeo2hdbospbsdn65l5n3i9e0r7acp.apps.googleusercontent.com">
               <Logincontext.Provider value={{ isLoggedIn, setIsLoggedIn ,setModalopen}}>
                   <Navbar login={isLoggedIn}/>
                   <Routes>
@@ -37,6 +40,7 @@ function App() {
                   <ToastContainer theme="dark" />
                   {modalopen && <Modal setModalopen={setModalopen}></Modal>}
               </Logincontext.Provider>
+              </GoogleOAuthProvider>
           </div>
       </BrowserRouter>
   );

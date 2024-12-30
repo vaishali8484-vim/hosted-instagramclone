@@ -8,7 +8,12 @@ export default function Home() {
   const[data,setData]=useState([]);
   const[comment,setComment]=useState("");
   const[show,setShow]=useState(false);
-  const[item,setItem]=useState([])
+  const[item,setItem]=useState([]);
+
+  
+  
+  
+  
   
   useEffect(()=>{
     
@@ -17,16 +22,25 @@ export default function Home() {
         navigate("/SignUp")
     }
 
-    // Fetching All Post
+    
+   // Fetching All Post
     fetch("/allposts", {
-      
-      headers: { "Authorization": "Bearer " + localStorage.getItem("jwt") },
-      
-    }).then(res=>res.json())
-    // .then(result=>console.log(result))
-    .then(result=>setData(result))
+       headers: { "Authorization": "Bearer " + localStorage.getItem("jwt") },
+      }).then(res=>res.json())
+       // .then(result=>console.log(result))
+    .then((result)=>{setData(result);
+       console.log(result)
+    })
     .catch(err=>console.log(err))
+
+   
     },[]);
+    
+
+    
+    
+    
+    
 
     // To show and hide comments
     const toggleComment=(posts)=>{
@@ -127,22 +141,22 @@ export default function Home() {
   return (
     <div className='home'>
       {/* card */}
-      {data.map((posts)=>{
-        // console.log(posts)
+      {/* {data.map((posts)=>{
+        
         return(
-<div className='card'>
-        {/* card header */}
+       <div className='card'>
+        
         <div className='card-header'>
           <div className='card-pic'>
             <img src={posts.postedby.Photo?posts.postedby.Photo:piclink} alt=""/>
           </div>
           <h5> <Link to={`/profile/${posts.postedby._id}`}>{posts.postedby.name}</Link></h5>
         </div>
-        {/* card image */}
+       
         <div className='card-image'> 
           <img src={posts.photo} alt=""/>
         </div>
-        {/* card content */}
+        
         <div className='card-content'>
           {posts.likes.includes(JSON.parse(localStorage.getItem("user"))._id)
           ?(<span className="material-symbols-outlined material-symbols-outlined-red" onClick={()=>{Unlikepost(posts._id)}}>favorite</span>):
@@ -154,7 +168,7 @@ export default function Home() {
         <p>{posts.body}</p>
         <p style={{fontWeight:"bold",cursor:"pointer"}} onClick={()=>{toggleComment(posts)}}>View all {posts.comments.length}  comments</p>
         </div>
-        {/* comment */}
+       
         <div className='add-comment'>
         <span className="material-symbols-outlined">mood</span>
         <input type="text" placeholder='add a comment' value={comment[posts._id] || ""} onChange={(e) => setComment({ ...comment, [posts._id]: e.target.value })} />
@@ -164,7 +178,65 @@ export default function Home() {
 
       </div>
         )
-      })}
+      })} */}
+
+ {/* Render posts safely */}
+{Array.isArray(data) && data.map((posts) => (
+  <div className='card' key={posts._id}>
+    {/* Card Header */}
+    <div className='card-header'>
+      <div className='card-pic'>
+        <img src={posts.postedby.Photo || piclink} alt="" />
+      </div>
+      <h5>
+        <Link to={`/profile/${posts.postedby._id}`}>{posts.postedby.name}</Link>
+      </h5>
+    </div>
+    {/* Card Image */}
+    <div className='card-image'>
+      <img src={posts.photo} alt="" />
+    </div>
+    {/* Card Content */}
+    <div className='card-content'>
+      {posts.likes.includes(JSON.parse(localStorage.getItem("user"))._id) ? (
+        <span
+          className="material-symbols-outlined material-symbols-outlined-red"
+          onClick={() => { Unlikepost(posts._id); }}>
+          favorite
+        </span>
+      ) : (
+        <span
+          className="material-symbols-outlined"
+          onClick={() => { likepost(posts._id); }}>
+          favorite
+        </span>
+      )}
+      <p>{posts.likes.length} Likes</p>
+      <p>{posts.body}</p>
+      <p
+        style={{ fontWeight: "bold", cursor: "pointer" }}
+        onClick={() => { toggleComment(posts); }}>
+        View all {posts.comments.length} comments
+      </p>
+    </div>
+    {/* Comment */}
+    <div className='add-comment'>
+      <span className="material-symbols-outlined">mood</span>
+      <input
+        type="text"
+        placeholder="add a comment"
+        value={comment[posts._id] || ""}
+        onChange={(e) => setComment({ ...comment, [posts._id]: e.target.value })}
+      />
+      <button
+        className="comment"
+        onClick={() => { makeComment(comment[posts._id], posts._id); }}>
+        post
+      </button>
+    </div>
+  </div>
+))}
+
      
      
       {/* show comments */}
@@ -195,14 +267,7 @@ export default function Home() {
             )
           })}
           
-          {/* <p className="comm">
-            <span className="commenter" style={{fontWeight:"bolder"}}>Ramesh </span>
-            <span className="commentText">Awesome pic</span>
-          </p>
-          <p className="comm">
-            <span className="commenter" style={{fontWeight:"bolder"}}>Ramesh </span>
-            <span className="commentText">Awesome pic</span>
-          </p> */}
+          
           </div>
           {/* card content */}
         <div className='card-content'>

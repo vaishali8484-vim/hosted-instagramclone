@@ -1,10 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState ,useContext} from 'react';
 import logo from '../img/logo.png';
 import '../css/SignUp.css';
 import { Link, useNavigate } from "react-router-dom";
 import {toast } from 'react-toastify';
+import { GoogleLogin } from '@react-oauth/google';
+import { jwtDecode } from "jwt-decode";
+import { Logincontext } from '../context/Logincontext';
 
 export default function SignUp() {
+  const{setIsLoggedIn}=useContext(Logincontext)
 const navigate=useNavigate()
 const [name, setName] = useState("");
 const [email, setEmail] = useState("");
@@ -66,6 +70,11 @@ const [password, setPassword] = useState("");
         
 }
 
+
+
+
+
+
   return (
     <div className="SignUp">
         <div className='form-container'>
@@ -90,7 +99,54 @@ const [password, setPassword] = useState("");
             <p className='loginpara' style={{fontSize:"12px", margin:"3px 0px"}}>
                 By Signing Up, you agree to our Terms,<br/> Privacy policy and cookies policy.
             </p>
-            <input type="submit" id="submit-btn" value="Sign up" onClick={()=>{postData()}}/></div>
+            <input type="submit" id="submit-btn" value="Sign up" onClick={()=>{postData()}}/>
+           <hr/>
+            <GoogleLogin
+               onSuccess={credentialResponse => {
+               console.log(credentialResponse);
+               const decoded = jwtDecode(credentialResponse.credential);
+                console.log(decoded);
+
+                fetch("/googlelogin", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ name:decoded.name,
+                                          username:decoded.username,
+                                          email:decoded.email,
+                                          email_verified:decoded.email_verified,
+                                          clientId:credentialResponse.clientId,
+                                          photo:decoded.picture
+                  })
+                })
+                
+                  .then(res => res.json())
+                  .then((data) => {
+                    if(data.error){
+                        notifyA(data.error)
+                        
+                    }
+                
+                    else{
+                        // notifyB(data.message ||"Sign-in successfully");
+                        notifyB("Signed In Successfully")
+                        console.log(data);
+                         localStorage.setItem("jwt",data.token);
+                         localStorage.setItem("user",JSON.stringify(data.user));
+                        setIsLoggedIn(true)
+                        navigate("/")
+                    }
+                     console.log("Success:", data);
+                  })
+                  .catch((err) => {
+                    notifyA(err.message);
+                    console.error("Error:", err.message);
+                  });
+               }}
+              //  onSuccess={handleGoogleLogin}
+            onError={() => {
+            console.log('Login Failed');
+             }}
+            />;</div>
             <div className='form2'>
                 Already have an account?
                 <Link  to="/SignIn"><span style={{color:"blue", cursor:"pointer"}}>Sign In</span></Link>
